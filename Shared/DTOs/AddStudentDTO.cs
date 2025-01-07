@@ -10,4 +10,6 @@ public class AddStudentDTO
         Name = name;
         Programme = programme;
     }
+    
+    public AddStudentDTO(){}
 }

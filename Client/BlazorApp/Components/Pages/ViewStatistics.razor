@@ -1,5 +1,86 @@
+@page "/view-statistics"
+@using Services
+@inject IGradeService GradeService
+@rendermode InteractiveServer
+
 <h3>ViewStatistics</h3>
 
-@code {
+<div class="container">
+    <label for="courseCode">Course Code</label>
+    <input id="courseCode" @bind="courseCode" />
+</div>
+
+<div class="container">
+    <label for="nrOfStudents">Number of Students</label> 
+    <input type="checkbox" @bind="showNrOfStudents"/>
+    @if (showNrOfStudents)
+    {
+        <label>@nrOfStudents</label>
+    }
     
+    <label for="nrOfPassed">Number of passed Students</label> 
+    <input type="checkbox" @bind="showNrOfPassedStudents"/>
+    @if (showNrOfPassedStudents)
+    {
+        <label>@nrOfPassedStudents</label>
+    }
+    
+    <label for="avgGrade">Average Grade</label> 
+    <input type="checkbox" @bind="showAvgGrade"/>
+    @if (showAvgGrade)
+    {
+        <label>@avgGrade</label>
+    }
+    
+    <label for="avgGradePassed">Average Grade of passed Students</label> 
+    <input type="checkbox" @bind="showAvgGradePassedStudents"/>
+    @if (showAvgGradePassedStudents)
+    {
+        <label>@avgGradePassedStudents</label>
+    }
+    
+    <label for="medianGrade">Median Grade</label> 
+    <input type="checkbox" @bind="showMedianGrade"/>
+    @if (showMedianGrade)
+    {
+        <label>@medianGrade</label>
+    }
+
+    <button type="button" @onclick="HandleValidSubmit">Fetch statistics</button>
+</div>
+
+@code {
+    private int? nrOfStudents;
+    private int? nrOfPassedStudents;
+    private double? avgGrade;
+    private double? avgGradePassedStudents;
+    private double? medianGrade;
+    private string courseCode;
+    
+    private bool showNrOfStudents;
+    private bool showNrOfPassedStudents;
+    private bool showAvgGrade;
+    private bool showAvgGradePassedStudents;
+    private bool showMedianGrade;
+    
+    private string errorMessage;
+    
+    private async Task HandleValidSubmit()
+    {
+        Console.WriteLine("Fetching statistics...");
+        try
+        {
+            var statistics = await GradeService.GetCourseStatisticsAsync(courseCode);
+            
+            nrOfStudents = statistics.TotalNumOfStudents;
+            nrOfPassedStudents = statistics.TotalNumOfPassedStudents;
+            avgGrade = statistics.AverageGradeOverall;
+            avgGradePassedStudents = statistics.AvgGradeOfPassed;
+            medianGrade = statistics.MedianGrade;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
 }

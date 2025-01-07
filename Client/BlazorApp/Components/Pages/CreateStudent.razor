@@ -1,5 +1,51 @@
-<h3>CreateStudent</h3>
+@page "/add-student"
+@using DTOs
+@using Services
+@inject IStudentService StudentService
+@inject ILogger<CreateStudent> Logger
+@rendermode InteractiveServer
+
+<h3>Create Student</h3>
+
+<div class="container">
+    <label for="name">Name</label>
+    <input id="name" @bind="name" />
+</div>
+
+<div class="container">
+    <label for="programme">Programme</label>
+    <input id="programme" @bind="programme" />
+</div>
+
+<button type="button" @onclick="HandleValidSubmit">Add Student</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
 
 @code {
-    
+    private string name;
+    private string programme;
+    private string errorMessage;
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var newStudent = new AddStudentDTO
+            {
+                Name = name,
+                Programme = programme
+            };
+            Logger.LogInformation("Attempting to add the student...");
+            await StudentService.AddStudentAsync(newStudent);
+            Logger.LogInformation("Student added successfully.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error adding student");
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
 }

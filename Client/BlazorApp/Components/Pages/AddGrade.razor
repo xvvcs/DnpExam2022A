@@ -1,5 +1,75 @@
+@page "/add-grade"
+@using Entities
+@using Services
+@rendermode InteractiveServer
+@inject IStudentService StudentService
 <h3>AddGrade</h3>
 
+<div class="container">
+    <label for="courseCode">Course Code</label>
+    <input id="courseCode" @bind="courseCode" />
+</div>
+
+<div class="container">
+    <label for="student">Student</label>
+    <select id="student" @bind="selectedStudentId">
+        @if (students != null)
+        {
+            @foreach (var student in students)
+            {
+                <option value="@student.studentId">@student.Name</option>
+            }
+        }
+    </select>
+</div>
+
+
+
+<div class="container">
+    <label for="grade">Grade</label>
+    <select id="grade" @bind="selectedGrade">
+        @if (grades != null)
+        {
+            @foreach (var grade in grades)
+            {
+                <option value="@grade">@grade</option>
+            }
+        }
+    </select>
+</div>
+
+<button type="button" @onclick="HandleValidSubmit">Add Grade</button>
+
 @code {
-    
+    private string courseCode;
+    private List<Student> students;
+    private int selectedStudentId; 
+    private int selectedGrade;
+    private List<int> grades;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        students = (await StudentService.GetAllStudentsAsync()).ToList();
+        grades = new List<int> { -3, 0, 2, 4, 7, 10, 12 };
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var selectedStudent = students.FirstOrDefault(s => s.studentId == selectedStudentId);
+            if (selectedStudent == null)
+            {
+                throw new Exception("Selected student not found.");
+            }
+
+            var newGrade = new GradeInCourse(courseCode, selectedGrade);
+            await StudentService.AddGradeToStudentAsync(selectedStudent.studentId, newGrade);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
 }
